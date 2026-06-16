@@ -129,7 +129,7 @@ def build_pdf(date_obj, weekday, day_staff, night_staff, residents_data, special
             continue
 
         def check_cell(ok):
-            return Paragraph("✓" if ok else "×",
+            return Paragraph("○" if ok else "×",
                              style(10, color=colors.HexColor("#4caf50") if ok else colors.HexColor("#cccccc"), align="CENTER"))
 
         m = r["meal"]
