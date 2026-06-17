@@ -212,6 +212,22 @@ def build_pdf(date_obj, weekday, day_staff, night_staff, residents_data, special
 # ── Streamlit UI ──────────────────────────────────────
 
 st.set_page_config(page_title="グループホーム ネクスト 日報", page_icon="📋", layout="centered")
+
+# パスワード認証
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+if not st.session_state["authenticated"]:
+    st.title("🔒 グループホーム ネクスト　日報")
+    pw = st.text_input("パスワードを入力してください", type="password")
+    if st.button("ログイン", use_container_width=True):
+        if pw == "346345":
+            st.session_state["authenticated"] = True
+            st.rerun()
+        else:
+            st.error("パスワードが違います")
+    st.stop()
+
 st.title("📋 グループホーム ネクスト　日報作成")
 
 today = datetime.date.today()
