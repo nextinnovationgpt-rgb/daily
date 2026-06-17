@@ -276,9 +276,27 @@ if not st.session_state["authenticated"]:
 # ホーム選択
 today = datetime.date.today()
 
-home_name = st.radio("ホームを選択", ["ネクスト", "アモーレ"], horizontal=True)
+st.markdown("### 🏠 ホームを選択してください")
+col1, col2 = st.columns(2)
+with col1:
+    next_selected = st.session_state.get("home_name", "ネクスト") == "ネクスト"
+    if st.button("🟢　ネクスト", use_container_width=True,
+                 type="primary" if next_selected else "secondary"):
+        st.session_state["home_name_select"] = "ネクスト"
+        st.session_state.pop("generated", None)
+        st.rerun()
+with col2:
+    amore_selected = st.session_state.get("home_name", "ネクスト") == "アモーレ"
+    if st.button("🟠　アモーレ", use_container_width=True,
+                 type="primary" if amore_selected else "secondary"):
+        st.session_state["home_name_select"] = "アモーレ"
+        st.session_state.pop("generated", None)
+        st.rerun()
+
+home_name = st.session_state.get("home_name_select", "ネクスト")
 cfg = HOME_CONFIG[home_name]
 
+st.markdown("---")
 st.title(f"📋 {cfg['title']}")
 
 with st.form(f"report_form_{home_name}"):
