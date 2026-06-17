@@ -100,7 +100,7 @@ def build_pdf(date_obj, weekday, day_staff, night_staff, residents_data, special
         Paragraph(f"日中：{day_staff}　／　夜間：{night_staff}", style(9, color=colors.white, align="CENTER")),
         Paragraph(date_str, style(10, color=colors.white, align="RIGHT")),
     ]]
-    header_table = Table(header_data, colWidths=[90*mm, 65*mm, 25*mm])
+    header_table = Table(header_data, colWidths=[85*mm, 60*mm, 35*mm])
     header_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#3d5a4c")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -161,7 +161,7 @@ def build_pdf(date_obj, weekday, day_staff, night_staff, residents_data, special
         right_header = Table([[
             Paragraph("本日の様子", style(8, color=colors.gray)),
             Paragraph(f"記：{r['recorder']}", style(8, color=colors.gray, align="RIGHT")),
-        ]], colWidths=[55*mm, 65*mm])
+        ]], colWidths=[50*mm, 60*mm])
 
         text = r.get("generated_text", "")
         right_content = Table([
