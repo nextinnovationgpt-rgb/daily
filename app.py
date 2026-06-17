@@ -264,24 +264,35 @@ if submitted:
             r["generated_text"] = generate_text(
                 r["name"], r["activity"], r["meal"], r["med"], r["condition"]
             )
+    st.session_state["generated"] = residents_input
+    st.session_state["report_date"] = report_date
+    st.session_state["special"] = special
 
-    st.success("生成完了！各入居者の文章を確認・編集できます。")
+if "generated" in st.session_state:
+    st.success("生成完了！文章を確認・編集してからPDFをダウンロードしてください。")
 
-    # 編集エリア
-    for r in residents_input:
-        r["generated_text"] = st.text_area(
+    edited_residents = []
+    for r in st.session_state["generated"]:
+        edited_text = st.text_area(
             f"{r['name']} さん　本日の様子",
             value=r["generated_text"],
             height=120,
             key=f"edit_{r['name']}",
         )
+        r_copy = dict(r)
+        r_copy["generated_text"] = edited_text
+        edited_residents.append(r_copy)
+
+    report_date = st.session_state["report_date"]
+    weekday = weekdays[report_date.weekday()]
+    special = st.session_state["special"]
 
     pdf_buf = build_pdf(
         report_date,
         weekday,
         "寺岡",
         "伊藤・稲田",
-        residents_input,
+        edited_residents,
         special,
     )
 
