@@ -45,7 +45,7 @@ HOME_CONFIG = {
     "アモーレ": {
         "title": "グループホーム　アモーレ 3号館　日報",
         "residents": ["館野真央", "小島勇人", "大塚蓮太"],
-        "empty_slots": [1],  # 2番目のスロットを空欄にする
+        "empty_slots": [],
         "day_staff": "丸山",
         "night_staff": "寺岡・坂口",
         "recorder": "寺岡　坂口",
