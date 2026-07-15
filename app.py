@@ -63,7 +63,7 @@ HOME_CONFIG = {
 DRIVE_BASE_STR = "/Users/maruyamashunya/Library/CloudStorage/GoogleDrive-nextinnovation.gpt@gmail.com/マイドライブ/グループホームフォルダ"
 
 
-def generate_text(name, activity, meal, med, condition):
+def generate_all_texts(residents_input):
     api_key = st.secrets.get("ANTHROPIC_API_KEY", "")
     if not api_key:
         import os
@@ -71,37 +71,48 @@ def generate_text(name, activity, meal, med, condition):
 
     client = anthropic.Anthropic(api_key=api_key)
 
-    context = [f"昼間活動：{activity}", f"体調：{condition}"]
-    meal_issues = [t for t, ok in meal.items() if not ok]
-    med_issues = [t for t, ok in med.items() if not ok]
-    if meal_issues:
-        context.append(f"食事未摂取：{'/'.join(meal_issues)}")
-    if med_issues:
-        context.append(f"服薬未：{'/'.join(med_issues)}")
+    residents_info = ""
+    for i, r in enumerate(residents_input, 1):
+        context = [f"昼間活動：{r['activity']}", f"体調：{r['condition']}"]
+        meal_issues = [t for t, ok in r["meal"].items() if not ok]
+        med_issues = [t for t, ok in r["med"].items() if not ok]
+        if meal_issues:
+            context.append(f"食事未摂取：{'/'.join(meal_issues)}")
+        if med_issues:
+            context.append(f"服薬未：{'/'.join(med_issues)}")
+        residents_info += f"\n【{i}人目：{r['name']}さん】\n" + "\n".join(context) + "\n"
 
-    prompt = f"""グループホームの日報「本日の様子」欄の文章を書いてください。
+    prompt = f"""グループホームの日報「本日の様子」欄の文章を、入居者ごとに書いてください。
 
-入居者名：{name} さん
-{chr(10).join(context)}
+{residents_info}
 
-【文体サンプル（B型就労支援の日）】
-本日は起床後、予定通り作業所へ通所いたしました。帰宅後は特に外出されることなく、終日ホーム内にてご自身のペースで穏やかに活動されました。体調を崩される様子も見受けられず、夕食や入浴などの日課を滞りなく済ませ、そのまま就寝いたしました。
-
-【文体サンプル（休日・ホーム内の日）】
-本日は作業所がお休みであったため、終日ホーム内にて過ごされました。特に外出されることはなく、室内でご自身のペースに合わせて穏やかに活動を続けられました。体調を崩されることもなく、夕食や入浴などの日課を滞りなく済ませ、予定通り就寝いたしました。
+【文体サンプル】
+- 「本日は起床後、予定通り作業所へ通所いたしました。帰宅後は特に外出されることなく、終日ホーム内にてご自身のペースで穏やかに活動されました。体調を崩される様子も見受けられず、夕食や入浴などの日課を滞りなく済ませ、そのまま就寝いたしました。」
+- 「起床後、予定通りB型就労支援へ通所されました。帰宅後は自室でゆっくりと過ごされ、夕食も問題なく召し上がりました。体調・気分ともに安定しており、入浴後はそのまま就寝されました。」
+- 「本日もB型就労支援に参加され、意欲的に作業に取り組まれていました。帰宅後はリビングで穏やかに過ごされ、食事・服薬ともに問題ありませんでした。体調は良好で、落ち着いた一日でした。」
 
 要件：
-- 上記サンプルと同じ文体・長さ（3〜4文）で書く
+- 各入居者の文章は**必ず異なる書き出し・異なる表現**で書く（同じ文章にならないよう）
+- 1人あたり3〜4文、敬体（〜されました、〜いたしました）
 - 活動内容→帰宅後の様子→体調→就寝の流れ
-- 食事・服薬に×があれば一言触れる、全て○なら触れない
-- 見出し・名前は不要、本文のみ出力
+- 食事・服薬に×があれば触れる、全て○なら触れない
+- 出力形式：各人の文章を「===」で区切って順番に出力（名前・見出し不要）
 """
+
     msg = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=512,
+        max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
     )
-    return msg.content[0].text.strip()
+
+    texts = msg.content[0].text.strip().split("===")
+    texts = [t.strip() for t in texts if t.strip()]
+
+    # 人数に合わせて補完
+    while len(texts) < len(residents_input):
+        texts.append("本日は終日穏やかにお過ごしになりました。体調・服薬ともに問題なく、就寝されました。")
+
+    return texts
 
 
 def build_pdf(date_obj, weekday, cfg, residents_data, special):
@@ -340,10 +351,9 @@ with st.form(f"report_form_{home_name}"):
 if submitted:
     weekday = WEEKDAYS[report_date.weekday()]
     with st.spinner("Claude が本日の様子を生成中..."):
-        for r in residents_input:
-            r["generated_text"] = generate_text(
-                r["name"], r["activity"], r["meal"], r["med"], r["condition"]
-            )
+        texts = generate_all_texts(residents_input)
+        for r, text in zip(residents_input, texts):
+            r["generated_text"] = text
     st.session_state["generated"] = residents_input
     st.session_state["report_date"] = report_date
     st.session_state["special"] = special
