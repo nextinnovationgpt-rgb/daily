@@ -30,9 +30,9 @@ HOME_CONFIG = {
         "title": "グループホーム　ネクスト　日報",
         "residents": ["末廣皆奈美", "道野生人", "細川隆希"],
         "empty_slots": [],
-        "day_staff": "寺岡",
-        "night_staff": "伊藤・稲田",
-        "recorder": "寺岡　伊藤・稲田",
+        "day_staff": "",
+        "night_staff": "坂口・寺岡",
+        "recorder": "坂口　寺岡",
         "color": "#3d5a4c",
         "badge_color": "#e8f5e9",
         "badge_border": "#a5d6a7",
@@ -46,9 +46,9 @@ HOME_CONFIG = {
         "title": "グループホーム　アモーレ 3号館　日報",
         "residents": ["館野真央", "小島勇人", "大塚蓮太", "大畑美奈"],
         "empty_slots": [],
-        "day_staff": "丸山",
-        "night_staff": "寺岡・坂口",
-        "recorder": "寺岡　坂口",
+        "day_staff": "",
+        "night_staff": "伊藤・稲田",
+        "recorder": "伊藤　稲田",
         "color": "#c45e1a",
         "badge_color": "#fff3e0",
         "badge_border": "#ffcc80",
@@ -168,9 +168,10 @@ def build_pdf(date_obj, weekday, cfg, residents_data, special):
 
     # ヘッダー
     date_str = f"{date_obj.year}/{date_obj.month}/{date_obj.day}（{weekday}）"
+    staff_line = f"記録：{cfg['night_staff']}" if cfg.get("day_staff") == "" else f"日中：{cfg['day_staff']}　／　夜間：{cfg['night_staff']}"
     header_data = [[
         Paragraph(cfg["title"], style(13, bold=True, color=colors.white)),
-        Paragraph(f"日中：{cfg['day_staff']}　／　夜間：{cfg['night_staff']}", style(9, color=colors.white, align="CENTER")),
+        Paragraph(staff_line, style(9, color=colors.white, align="CENTER")),
         Paragraph(date_str, style(10, color=colors.white, align="RIGHT")),
     ]]
     header_table = Table(header_data, colWidths=[85*mm, 60*mm, 35*mm])
