@@ -28,7 +28,7 @@ WEEKDAYS = ["月", "火", "水", "木", "金", "土", "日"]
 HOME_CONFIG = {
     "ネクスト": {
         "title": "グループホーム　ネクスト　日報",
-        "residents": ["末廣皆奈美", "道野生人", "細川隆希"],
+        "residents": ["細川隆希", "武長笑美"],
         "empty_slots": [],
         "day_staff": "",
         "night_staff": "坂口・寺岡",
@@ -355,8 +355,12 @@ with st.form(f"report_form_{home_name}"):
             meal_e = mc3.checkbox("夕", value=True, key=f"me_{home_name}_{name}")
             st.write("**服薬**")
             dc1, dc2, dc3 = st.columns(3)
-            med_m = dc1.checkbox("朝 ", value=True, key=f"dm_{home_name}_{name}")
-            med_n = dc2.checkbox("昼 ", value=True, key=f"dn_{home_name}_{name}")
+            # 夕のみデフォルトONの利用者
+            med_eve_only = ["小島勇人", "大塚蓮太"]
+            med_default_m = name not in med_eve_only
+            med_default_n = name not in med_eve_only
+            med_m = dc1.checkbox("朝 ", value=med_default_m, key=f"dm_{home_name}_{name}")
+            med_n = dc2.checkbox("昼 ", value=med_default_n, key=f"dn_{home_name}_{name}")
             med_e = dc3.checkbox("夕 ", value=True, key=f"de_{home_name}_{name}")
 
         residents_input.append({
