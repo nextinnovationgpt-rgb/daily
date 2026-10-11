@@ -334,10 +334,18 @@ cfg = HOME_CONFIG[home_name]
 st.markdown("---")
 st.title(f"📋 {cfg['title']}")
 
-with st.form(f"report_form_{home_name}"):
-    report_date = st.date_input("日付", value=today)
-    st.markdown("---")
+# フォーム外で日付選択 — 変更を即時検知してリセット可能にする
+report_date = st.date_input("日付", value=today, key=f"report_date_{home_name}")
 
+# 日付またはホームが変わったら生成済み文章をリセット
+_prev_date = st.session_state.get("report_date")
+_prev_home = st.session_state.get("home_name")
+if _prev_date is not None and (_prev_date != report_date or _prev_home != home_name):
+    st.session_state.pop("generated", None)
+
+st.markdown("---")
+
+with st.form(f"report_form_{home_name}"):
     residents_input = []
     for name in cfg["residents"]:
         st.subheader(f"👤 {name} さん")
